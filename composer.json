@@ -1,0 +1,21 @@
+{
+    "name": "mbarquin/slim-dynamic-routing",
+    "description": "A factory object to instance and configure Slim Framework in order to use dynamic routing",
+    "keywords": ["microframework","rest","router","dynamic","php","slim"],
+    "homepage": "http://github.com/mbarquin/slim-dinamic-routing",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Moisés Barquín Salgado",
+            "email": "moises.barquin@gmail.com",
+            "homepage": "http://www.mercenariophp.com/"
+        }
+    ],
+    "require": {
+        "php": ">=5.5.0",
+        "slim/slim": "^3.1"
+    },
+    "autoload": {
+        "psr-4": { "mbarquin\\SlimDR\\": "src/" }
+    }
+}
