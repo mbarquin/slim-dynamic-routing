@@ -46,8 +46,10 @@ It sets up the secondary group name to be used as subprefix on these calls, http
 * **withContainer($settings)**
 Mandatory. It's used to ask Factory object to inject a config array or container on \Slim\App constructor.
 
-* **withNamespace($settings)**
-Mandatory. It's used to autload controllers using its namespace, Controller classes namespace must be provided. This controllers must extend \mbarquin\SlimDR\ParentController or implement ControllerInterface as explained below.
+* **withNamespace('\\\\MyApp\\\\Controller')**
+Mandatory. It's used to autload controllers using its namespace. These controllers must extend \mbarquin\SlimDR\ParentController or implement \mbarquin\SlimDR\ControllerInterface as explained below.
 
 * **getApp()**
-Instances and returns a new \Slim\App Instance with all previous config implemented.
+Instances and returns a new \Slim\App Instance with all previous params implemented.
+
+Now you only have to extend the SlimDR ParentController in your controllers or implement by yourself ControllerInterface on ypur parent controller.
