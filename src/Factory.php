@@ -3,6 +3,15 @@
  * Factory file class, it configures dynamic router options 
  * and returns a new Slim instance
  *
+ * PHP version 5.6
+ *
+ *
+ * @category   SlimDR
+ * @package    Factory
+ * @subpackage Factory
+ * @author     Moises Barquin Salgado <moises.barquin@gmail.com>
+ * @copyright  Moises Barquin Salgado 2016
+ * @version    GIT: $Id$
  */
 namespace mbarquin\SlimDR;
 
