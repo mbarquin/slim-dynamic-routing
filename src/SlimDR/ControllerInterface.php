@@ -23,20 +23,12 @@ interface ControllerInterface
 {
     /**
      * Receives container to inject it on controller object
-     * 
-     * @param \Interop\Container\ContainerInterface $container
-     * 
-     * @return void
+     *
+     * @param string HTTP Method used in call
+     *
+     * @return array()
      * @access public
      */
-    public function __construct(\Interop\Container\ContainerInterface $container);
-    
-    /**
-     * Returns referenced container object
-     * 
-     * @return \Interop\Container\ContainerInterface
-     * @acess public
-     */
-    public function getContainer();
+    public function getDependencies($method);
 }
 

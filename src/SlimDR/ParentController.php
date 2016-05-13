@@ -16,32 +16,28 @@
 namespace mbarquin\SlimDR;
 
 /**
- * Controllers parent, 
+ * Controllers parent,
  * implements SlimDR interface
  */
 class ParentController implements ControllerInterface
 {
-    protected $container;
+    protected $dependencies;
 
-    /**
-     * Class constructor, DI container must be received.
-     *
-     * @param \Interop\Container\ContainerInterface $container
-     * @return void
-     */
-    public function __construct(\Interop\Container\ContainerInterface $container)
+    const POST   = 'post';
+    const GET    = 'get';
+    const DELETE = 'delete';
+    const OPTION = 'option';
+    const PUT    = 'put';
+
+    public function getDependencies($method)
     {
-        $this->container = $container;
+        if (isset($this->dependencies[$method]) === true
+                && is_array($this->dependencies[$method]) === true) {
+            return $this->dependencies[$method];
+        } else {
+            return array();
+        }
     }
 
-    /**
-     * DI container getter
-     *
-     * @return Interop\Container\ContainerInterface
-     */
-    public function getContainer()
-    {
-        return $this->container;
-    }
 }
 

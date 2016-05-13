@@ -1,6 +1,6 @@
 <?php
 /**
- * Factory file class, it configures dynamic router options 
+ * Factory file class, it configures dynamic router options
  * and returns a new Slim instance
  *
  * PHP version 5.6
@@ -15,16 +15,19 @@
  */
 namespace mbarquin\SlimDR;
 
+use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\ResponseInterface;
+use Interop\Container\ContainerInterface;
 
 /**
- * Factory class, it configures dynamic router options 
+ * Factory class, it configures dynamic router options
  * and returns a new Slim instance
  */
 class Factory
 {
     /**
      * Slim application object reference
-     * 
+     *
      * @var \Slim\App
      */
     private $slimApp      = null;
@@ -38,7 +41,7 @@ class Factory
 
     /**
      * Grouped routes, second level name
-     * 
+     *
      * @var string
      */
     private $versionGroup = null;
@@ -46,7 +49,7 @@ class Factory
     /**
      * Container object reference or config array
      * to be injected into slim constructor
-     * 
+     *
      * @var mixed
      */
     private $container    = array();
@@ -124,7 +127,7 @@ class Factory
      * it sets config array or container to be used on slim app constructor
      *
      * @param mixed $container
-     * 
+     *
      * @return \MyApp\slimDR\Factory
      * @access public
      * @throws InvalidArgumentException
@@ -148,7 +151,7 @@ class Factory
      * Sets controllers namespace
      *
      * @param string $namespace Namespace to autoload controllers
-     * 
+     *
      * @return \MyApp\slimDR\Factory
      */
     public function withNamespace($namespace)
@@ -230,25 +233,40 @@ class Factory
 
             // Get config namespace if necessary
             $calledController = $namespace.'\\'.$args['controller'];
-            try {
-                $controller       = new $calledController($contDI);
-                if (is_a($controller, "\\mbarquin\\SlimDR\\ControllerInterface") === false) {
-                    throw new \Exception('Controller must implement \\mbarquin\\SlimDR\\ControllerInterface');
-                }
 
-                $funcArgs = array(
-                    'request' => $request,
-                    'reponse' => $response,
-                    'args'    => split('/', $args['params'])
-                );
-
-                call_user_func_array(array($controller, $method.'Method'), $funcArgs);
-            } catch(\Exception $excp) {
-                if(in_array("\\mbarquin\\SlimDR\\ControllerInterface", class_implements($calledController)) === false) {
-                    throw new \Exception('Controller must implement \\mbarquin\\SlimDR\\ControllerInterface');
-                }
+            $controller       = new $calledController();
+            if (is_a($controller, "\\mbarquin\\SlimDR\\ControllerInterface") === false) {
+                throw new \Exception('Controller must implement \\mbarquin\\SlimDR\\ControllerInterface');
             }
+
+            $funcArgs = \mbarquin\SlimDR\Factory::getArgs(
+                    $request, $response, $args, $contDI, $controller, $method
+            );
+
+            call_user_func_array(array($controller, $method.'Method'), $funcArgs);
         });
+    }
+
+    /**
+     * Sets an array to be used to fill parameters in controllers call
+     *
+     * @param Psr\Http\Message\ServerRequestInterface $request
+     * @param Psr\Http\Message\ResponseInterface      $response
+     * @param array                                   $args
+     * @param Interop\Container\ContainerInterface    $contDI
+     * @param string                                  $controller
+     * @param string                                  $method
+     */
+    static function getArgs(ServerRequestInterface $request, ResponseInterface $response, $args, ContainerInterface $contDI, $controller, $method)
+    {
+        $deps = $controller->getDependencies($method);
+
+        $aReturn = array(
+            'request' => $request,
+            'reponse' => $response,
+            'args'    => explode('/', $args['params']),
+        );
+        return $aReturn;
     }
 
 }
