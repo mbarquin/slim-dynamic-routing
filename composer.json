@@ -16,6 +16,6 @@
         "slim/slim": "^3.1"
     },
     "autoload": {
-        "psr-4": { "mbarquin\\SlimDR\\": "src/" }
+        "psr-4": { "mbarquin\\SlimDR\\": "src/SlimDR/" }
     }
 }
