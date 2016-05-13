@@ -21,8 +21,24 @@ namespace mbarquin\SlimDR;
  */
 class ParentController implements ControllerInterface
 {
+    const POST = 'post';
+    const GET  = 'GET';
+    const OPTION  = 'OPTION';
+    const DELETE  = 'DELETE';
+    
+    static public $dependencies = [];
+    
     protected $container;
 
+    static public function getDependencies($method)
+    {
+        if (isset(self::$dependencies[$method]) === true) {
+            return self::$dependencies[$method];
+        } else {
+            return array();
+        }
+    }
+    
     /**
      * Class constructor, DI container must be received.
      *
