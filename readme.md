@@ -13,7 +13,7 @@ Installation
 You can install the component in the following ways:
 
 * Use the official Github repository (https://github.com/mbarquin/slim-dynamic-router)
-* Use composer : composer require mbarquin/slim-dynamic-router --dev
+* Use composer : composer require mbarquin/slim-dynamic-routing
 
 
 Usage
