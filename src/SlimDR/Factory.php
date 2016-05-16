@@ -243,7 +243,7 @@ class Factory
                     $request, $response, $args, $contDI, $controller, $method
             );
 
-            call_user_func_array(array($controller, $method.'Method'), $funcArgs);
+            call_user_func_array(array($controller, $method), $funcArgs);
         });
     }
 
@@ -266,6 +266,12 @@ class Factory
             'reponse' => $response,
             'args'    => explode('/', $args['params']),
         );
+
+        if(is_array($deps) === true) {
+            foreach($deps as $depInstance) {
+               $aReturn[$depInstance] = $contDI->get($depInstance);
+            }
+        }
         return $aReturn;
     }
 

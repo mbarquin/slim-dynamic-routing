@@ -52,4 +52,58 @@ Mandatory. It's used to autload controllers using its namespace. These controlle
 * **getApp()**
 Instances and returns a new \Slim\App Instance with all previous params implemented.
 
-Now you only have to extend the SlimDR ParentController in your controllers or implement by yourself ControllerInterface on ypur parent controller.
+Now you only have to extend the SlimDR ParentController on your controllers or implement **ControllerInterface** by yourself on your parent controller. This implementation is intended to avoid *Service Location anti-pattern*, our controllers must provide a way of communicating which are their dependencies. In this way our controllers will not depend on containers, only in the services we need to really use.
+
+```php
+    /**
+     * Test Controller file
+     * SlimDR example controller
+     *
+     * PHP version 5.6
+     *
+     *
+     * @category   SlimDR
+     * @package    Test
+     * @subpackage Controller
+     * @author     Moises Barquin Salgado <moises.barquin@gmail.com>
+     * @copyright  Moises Barquin Salgado 2016
+     * @version    GIT: $Id$
+     */
+
+    namespace MyApp\Controller;
+
+    use mbarquin\SlimDR\ParentController;
+
+    /**
+     * Class test, must implements Controller interface
+     * It's extended from mbarquin\SlimDR\Parentcontroller
+     */
+    class test extends ParentController
+    {
+        /**
+         * Array with actions dependencies, in the form [ method => [dependencies]]
+         * @var type
+         */
+        protected $dependencies = array(
+            self::GET => array ('db', 'logger')
+        );
+
+        /**
+         * GET method as controller action,
+         * Params which are not request, reponse and args must be declared on
+         * dependencies array.
+         *
+         * @param Psr\Http\Message\ServerRequestInterface $request  Request object
+         * @param Psr\Http\Message\ResponseInterface      $response Reponse object
+         * @param array                                   $args     Request params
+         * @param \stdClass                               $db       Database object
+         * @param \Monolog\Logger                         $logger   Logger object
+         */
+        public function get($request, $response, $args, \stdClass $db, \Monolog\Logger $logger)
+        {
+            print_r($db);
+        }
+    }
+```
+
+Protected property $dependencies must contain an array, the indexes must be the method name.
