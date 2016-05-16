@@ -106,4 +106,25 @@ Now you only have to extend the SlimDR ParentController on your controllers or i
     }
 ```
 
-Protected property $dependencies must contain an array, the indexes must be the method name.
+Controller protected property $dependencies must be an array, the indexes must be the request method name, and its array contents must be the key in the dependencies injector to access the necessary object. Parent controller has declared all methods (GET, POST, DELETE, etc...) as constants, we can use them to define this array
+
+```php
+    $dependencies = array(
+        self::POST => array('dep1', 'dep2', 'dep3'),
+        self::GET  => array('dep1'),
+        self::PUT  => array('dep3')
+        ...
+    );
+```
+
+These dependencies must be already injected to DI container, the key in the dependencies method array must be the key to localize the object in the container. Out of our controller, slim container must be setted to accomplish these dependencies.
+
+```php
+    $container       = $app->getContainer();
+
+    $container['dep1'] = function ($c) {
+        $db = new stdClass();
+
+        return $db;
+    };
+```
