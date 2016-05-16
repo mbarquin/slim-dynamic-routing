@@ -54,6 +54,8 @@ Instances and returns a new \Slim\App Instance with all previous params implemen
 
 Now you only have to extend the SlimDR ParentController on your controllers or implement **ControllerInterface** by yourself on your parent controller. This implementation is intended to avoid *Service Location anti-pattern*, our controllers must provide a way of communicating which are their dependencies. In this way our controllers will not depend on containers, only on the services we really need to use.
 
+Slim will search and call a function named like the method used in call, if it is a method GET call, function get will be the one called on controller. If the call is via PUT method, slim will try to raise put function in controller.
+
 ```php
     /**
      * Test Controller file
@@ -101,7 +103,7 @@ Now you only have to extend the SlimDR ParentController on your controllers or i
          */
         public function get($request, $response, $args, \stdClass $db, \Monolog\Logger $logger)
         {
-            print_r($db);
+            print_r($args);
         }
     }
 ```
