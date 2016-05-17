@@ -29,6 +29,14 @@ class ParentController implements ControllerInterface
     const OPTION = 'option';
     const PUT    = 'put';
 
+    /**
+     * Returns an array with dependencies as container label indexes
+     * They must be in the same order as the params in the method i controller
+     * 
+     * @param string $method HTTP Method used in call
+     * 
+     * @return array
+     */
     public function getDependencies($method)
     {
         if (isset($this->dependencies[$method]) === true
