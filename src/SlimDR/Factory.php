@@ -185,7 +185,7 @@ class Factory
 
         } else {
             // Sets dynamic routing for bare routes.
-            \mbarquin\slimDR\Factory::setMap($this->slimApp);
+            \mbarquin\SlimDR\Factory::setMap($this->slimApp);
         }
 
         return $this->slimApp;
