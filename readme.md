@@ -37,6 +37,9 @@ After requiring autoload, with an static call we can ask the Factory object to m
 
 Static method *slim()* returns the Factory object, and each next call will return the same object to continue with the setup process. Methods like withGroup, withVersionGroup, withContainer and withNamespace all return the Factory object itself, allowing concatenate functions on it. Function getApp finally returns a new \Slim\App object.
 
+* **slim(\Slim\App $app=null)**
+It creates and retunr a new Factory instance, if a \Slim\App is provided as param it keeps a reference of it (in testing process) in order to setup this instance, not a new one when getApp() is called.
+
 * **withGroup($mainGroup)**
 It sets up the main group name to be used as prefix on these calls, http://www.myserver.com/api/controller, this function returns the Factory object itself. If not setted, routes will use version group or nothing as routes prefix
 
@@ -50,7 +53,7 @@ Mandatory. It's used to ask Factory object to inject a config array or container
 Mandatory. It's used to autload controllers using its namespace. These controllers must extend \mbarquin\SlimDR\ParentController or implement \mbarquin\SlimDR\ControllerInterface as explained below.
 
 * **getApp()**
-Instances and returns a new \Slim\App Instance with all previous params implemented.
+Instances and returns a new \Slim\App Instance with all previous params implemented. (In testing process) If in initial static method slim($app) a Slim\App object was provided as param, this function will setup this instance and return it.
 
 Now you only have to extend the SlimDR ParentController on your controllers or implement **ControllerInterface** by yourself on your parent controller. This implementation is intended to avoid *Service Location anti-pattern*, our controllers must provide a way of communicating which are their dependencies. In this way our controllers will not depend on containers, only on the services we really need to use.
 
@@ -112,7 +115,7 @@ Controller protected property $dependencies must be an array, the indexes must b
 
 ```php
     $dependencies = array(
-        self::POST => array('dep1', 'dep2', 'dep3'),
+        self::POST => array('dep1', 'db', 'dep3'),
         self::GET  => array('dep1'),
         self::PUT  => array('dep3')
         ...
@@ -124,7 +127,7 @@ These dependencies must be already injected to DI container, the key in the depe
 ```php
     $container       = $app->getContainer();
 
-    $container['dep1'] = function ($c) {
+    $container['db'] = function ($c) {
         $db = new stdClass();
 
         return $db;
