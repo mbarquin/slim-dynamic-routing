@@ -185,7 +185,7 @@ class Factory
 
         } else {
             // Sets dynamic routing for bare routes.
-            \mbarquin\SlimDR\Factory::setMap($this->slimApp);
+            \mbarquin\SlimDR\Factory::setMap($this->slimApp, $this->namespace);
         }
 
         return $this->slimApp;
@@ -201,7 +201,7 @@ class Factory
      * @return void
      * @access protected
      */
-    private function setGroups(\Slim\App $app, $group, $subGroup) {
+    private function setGroups(\Slim\App $app, $group, $subGroup = null) {
         $ns = $this->namespace;
         $app->group('/'.$group, function () use ($subGroup, $ns) {
             // Version group
