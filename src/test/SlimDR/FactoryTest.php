@@ -41,6 +41,15 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * @covers mbarquin\SlimDR\Factory::__construct
+     * @todo   Implement testSlim().
+     */
+    public function testSlimConstruct()
+    {
+        $this->assertInstanceOf('\\mbarquin\\SlimDR\\Factory', $this->object);
+    }
+    
+    /**
      * @covers mbarquin\SlimDR\Factory::slim
      * @todo   Implement testSlim().
      */
@@ -109,11 +118,6 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
         // Remove the following lines when you implement this test.
         $oFact = Factory::slim()->withVersionGroup('testsubgroup');
 
-        $container = $slimProcessed->getContainer();
-
-        $routes = $container->get('router')->getRoutes();
-        $rout = array_values($routes);
-        $group = $rout[0]->getGroups();
         $this->assertAttributeContains('testsubgroup', 'versionGroup', $oFact);
     }
     
