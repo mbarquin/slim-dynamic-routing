@@ -135,7 +135,7 @@ class Factory
     public function withContainer($container = array())
     {
         if ($this->slimApp !== null) {
-            throw new InvalidArgumentException(
+            throw new \InvalidArgumentException(
                     'Container must be already injected to Slim'
             );
         }
