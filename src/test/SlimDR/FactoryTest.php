@@ -48,7 +48,7 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
     {
         $this->assertInstanceOf('\\mbarquin\\SlimDR\\Factory', $this->object);
     }
-    
+
     /**
      * @covers mbarquin\SlimDR\Factory::slim
      * @todo   Implement testSlim().
@@ -59,7 +59,7 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
         $slim->group('/users', function () {
             $this->get('/reset-password', function ($request, $response, $args) {
                 // Code here.
-                })->setName('user-password-reset');
+            })->setName('user-password-reset');
         });
 
         $oFact = Factory::slim($slim);
@@ -76,19 +76,17 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
         $slim->group('/users', function () {
             $this->get('/reset-password', function ($request, $response, $args) {
                 // Code here.
-                })->setName('user-password-reset');
+            })->setName('user-password-reset');
         });
 
-        $oFact = Factory::slim($slim);
-
+        $oFact         = Factory::slim($slim);
         $slimProcessed = $oFact->withGroup('admin')->getApp();
+        $container     = $slimProcessed->getContainer();
+        $routes        = $container->get('router')->getRoutes();
+        $rout          = array_values($routes);
+        $group         = $rout[0]->getGroups();
+        $group2        = $rout[1]->getGroups();
 
-        $container = $slimProcessed->getContainer();
-
-        $routes = $container->get('router')->getRoutes();
-        $rout = array_values($routes);
-        $group = $rout[0]->getGroups();
-        $group2 = $rout[1]->getGroups();
         $this->assertAttributeContains('/users', 'pattern', $group[0]);
         $this->assertAttributeContains('/admin', 'pattern', $group2[0]);
     }
@@ -101,12 +99,12 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
     {
         // Remove the following lines when you implement this test.
         $slimProcessed = $this->object->withGroup('testgroup')->getApp();
+        $container     = $slimProcessed->getContainer();
 
-        $container = $slimProcessed->getContainer();
+        $routes        = $container->get('router')->getRoutes();
+        $rout          = array_values($routes);
+        $group         = $rout[0]->getGroups();
 
-        $routes = $container->get('router')->getRoutes();
-        $rout = array_values($routes);
-        $group = $rout[0]->getGroups();
         $this->assertAttributeContains('/testgroup', 'pattern', $group[0]);
     }
 
@@ -120,7 +118,7 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
 
         $this->assertAttributeContains('testsubgroup', 'versionGroup', $oFact);
     }
-    
+
     /**
      * @covers mbarquin\SlimDR\Factory::withVersionGroup
      * @todo   Implement testWithVersionGroup().
@@ -129,15 +127,15 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
     {
         // Remove the following lines when you implement this test.
         $slimProcessed = Factory::slim()->getApp();
+        $container     = $slimProcessed->getContainer();
 
-        $container = $slimProcessed->getContainer();
+        $routes        = $container->get('router')->getRoutes();
+        $rout          = array_values($routes);
 
-        $routes = $container->get('router')->getRoutes();
-        $rout = array_values($routes);
         $this->assertCount(0, $rout[0]->getGroups());
     }
 
-    
+
     /**
      * @covers mbarquin\SlimDR\Factory::withContainer
      * @todo   Implement testWithContainer().
@@ -150,16 +148,17 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
                 'displayErrorDetails' => true, // set to false in production
                 'app.basename' => '\\Testbasename'
             ],
-            
+
         ];
-        $slimProcessed = $this->object->withContainer($settings)->getApp();
-        $container = $slimProcessed->getContainer();
+
+        $slimProcessed     = $this->object->withContainer($settings)->getApp();
+        $container         = $slimProcessed->getContainer();
         $settingsProcessed = $container->get('settings');
-        
+
         $this->assertEquals(
             $settingsProcessed['app.basename'], $settings['settings']['app.basename']
         );
-        
+
     }
 
     /**
@@ -174,14 +173,15 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
                 'displayErrorDetails' => true, // set to false in production
                 'app.basename' => '\\Testbasename'
             ],
-            
         ];
-        $slim = new \Slim\App();
+
+        $slim  = new \Slim\App();
         $oFact = Factory::slim($slim);
+
         $oFact->withContainer($settings)->getApp();
-        
+
     }
-    
+
     /**
      * @covers mbarquin\SlimDR\Factory::withNamespace
      * @todo   Implement testWithNamespace().
@@ -189,7 +189,7 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
     public function testWithNamespace()
     {
         $oApp = $this->object->withNamespace('\\test\\namespace');
-        
+
         $this->assertAttributeEquals('\\test\\namespace', 'namespace', $oApp);
     }
 
@@ -218,25 +218,57 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
                 ->withVersionGroup('testsubgroup')
                 ->withNamespace('\\mbarquin\\Controllers')
                 ->getApp();
-        
+
         $container = $slimProcessed->getContainer();
 
-        $routes = $container->get('router')->getRoutes();
-        $rout = array_values($routes);
-        $group = $rout[0]->getGroups();
+        $routes    = $container->get('router')->getRoutes();
+        $rout      = array_values($routes);
+        $group     = $rout[0]->getGroups();
+
         $this->assertAttributeContains('/testsubgroup', 'pattern', $group[0]);
     }
-    
+
     /**
      * @covers mbarquin\SlimDR\Factory::setMap
      * @todo   Implement testSetMap().
      */
     public function testSetMap()
     {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-                'This test has not been implemented yet.'
-        );
+        $settings = [
+            'settings' => [
+                'displayErrorDetails' => true, // set to false in production
+                'app.basename' => '\\Testbasename'
+            ],
+        ];
+
+        $confSlim = $this->object
+                ->withGroup('api')
+                ->withVersionGroup('v1')
+                ->withContainer($settings)
+                ->withNamespace('\\mbarquin\\SlimDR\\Test\\Controller')
+                ->getApp();
+
+        $env = \Slim\Http\Environment::mock([
+            'REQUEST_METHOD' => 'GET',
+            'REQUEST_URI' => '/api/v1/test/param1/param2'
+        ]);
+
+        $request = \Slim\Http\Request::createFromEnvironment($env);
+
+        $response  = new \Slim\Http\Response();
+        $container = $confSlim->getContainer();
+        $container['db'] = function ($c) {
+            $db = new \stdClass();
+
+            return $db;
+        };
+        //$routes    = $container->get('router')->getRoutes();
+        //$rout      = array_values($routes);
+        //$request   = $request->withAttribute('router', $rout[0]);
+        $resp      = $confSlim->process($request, $response);
+
+        //$this->assertTrue(isset($resp));
+
     }
 
     /**
