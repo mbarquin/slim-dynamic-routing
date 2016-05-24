@@ -50,6 +50,17 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * @covers mbarquin\SlimDR\Factory::__construct
+     * @todo   Implement testSlim().
+     */
+    public function testSlimConstructWithApp()
+    {
+        $slim = new \Slim\App();
+        $app = \mbarquin\SlimDR\Factory::slim($slim);
+        $this->assertAttributeInstanceOf('\\Slim\\App', 'slimApp', $app);
+    }
+    
+    /**
      * @covers mbarquin\SlimDR\Factory::slim
      * @todo   Implement testSlim().
      */
@@ -109,6 +120,23 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * @covers mbarquin\SlimDR\Factory::setGroup
+     * @todo   Implement testWithGroup().
+     */
+    public function testSetGroup()
+    {
+        // Remove the following lines when you implement this test.
+        $slimProcessed = $this->object->withGroup('testgroup')->getApp();
+        $container     = $slimProcessed->getContainer();
+
+        $routes        = $container->get('router')->getRoutes();
+        $rout          = array_values($routes);
+        $group         = $rout[0]->getGroups();
+
+        $this->assertAttributeContains('/testgroup', 'pattern', $group[0]);
+    }
+    
+    /**
      * @covers mbarquin\SlimDR\Factory::withVersionGroup
      */
     public function testWithVersionGroupOnly()
@@ -120,8 +148,8 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers mbarquin\SlimDR\Factory::withVersionGroup
-     * @todo   Implement testWithVersionGroup().
+     * @covers mbarquin\SlimDR\Factory::getApp
+     * @todo   Implement testWithNoGroup().
      */
     public function testWithNoGroups()
     {
@@ -262,13 +290,10 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
 
             return $db;
         };
-        //$routes    = $container->get('router')->getRoutes();
-        //$rout      = array_values($routes);
-        //$request   = $request->withAttribute('router', $rout[0]);
-        $resp      = $confSlim->process($request, $response);
-
-        //$this->assertTrue(isset($resp));
-
+        $resp = $confSlim->process($request, $response);
+        $body = (string)$resp->getBody();
+        $this->assertContains('param1', $body);
+        $this->assertContains('param2', $body);
     }
 
     /**
@@ -277,10 +302,73 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
      */
     public function testGetArgs()
     {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-                'This test has not been implemented yet.'
-        );
+        $settings = [
+            'settings' => [
+                'displayErrorDetails' => true, // set to false in production
+                'app.basename' => '\\Testbasename'
+            ],
+        ];
+
+        $confSlim = $this->object
+                ->withGroup('api')
+                ->withVersionGroup('v1')
+                ->withContainer($settings)
+                ->withNamespace('\\mbarquin\\SlimDR\\Test\\Controller')
+                ->getApp();
+
+        $env = \Slim\Http\Environment::mock([
+            'REQUEST_METHOD' => 'GET',
+            'REQUEST_URI' => '/api/v1/test/param1/param2'
+        ]);
+
+        $request = \Slim\Http\Request::createFromEnvironment($env);
+
+        $response  = new \Slim\Http\Response();
+        $container = $confSlim->getContainer();
+        $container['db'] = function ($c) {
+            $db = new \stdClass();
+
+            return $db;
+        };
+        $resp = $confSlim->process($request, $response);
+        $body = (string)$resp->getBody();
+        $this->assertContains('param1', $body);
+        $this->assertContains('param2', $body);
+    }
+    
+    /**
+     * @covers mbarquin\SlimDR\Factory::getArgs
+     * @todo   Implement testSetMapExceptionNotInjected().
+     * @throws LogicException
+     */
+    public function testSetMapExceptionNotInjected()
+    {
+        $settings = [
+            'settings' => [
+                'displayErrorDetails' => true, // set to false in production
+                'app.basename' => '\\Testbasename'
+            ],
+        ];
+
+        $confSlim = $this->object
+                ->withGroup('api')
+                ->withVersionGroup('v1')
+                ->withContainer($settings)
+                ->withNamespace('\\mbarquin\\SlimDR\\Test\\Controller')
+                ->getApp();
+
+        $env = \Slim\Http\Environment::mock([
+            'REQUEST_METHOD' => 'GET',
+            'REQUEST_URI' => '/api/v1/test/param1/param2'
+        ]);
+
+        $request = \Slim\Http\Request::createFromEnvironment($env);
+
+        $response  = new \Slim\Http\Response();
+        $container = $confSlim->getContainer();
+
+        $resp = $confSlim->process($request, $response);
+
     }
 
 }

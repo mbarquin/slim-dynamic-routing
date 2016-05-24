@@ -270,7 +270,6 @@ class Factory
         if(is_array($deps) === true) {
             foreach($deps as $depInstance) {
                if($contDI->has($depInstance) === false) {
-                   echo 'Dependency '.$depInstance.' not found in container'; die();
                    throw new \LogicException('Dependency '.$depInstance.' not found in container');
                }
                $aReturn[$depInstance] = $contDI->get($depInstance);

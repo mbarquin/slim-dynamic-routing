@@ -45,16 +45,7 @@ class test extends ParentController
      */
     public function get($request, $response, $args, \stdClass $db)
     {
-/*
-        $body = $response->getBody();
-        $body->write("Hello, ".$args[0]);
-        var_dump( $body->getBody()->read($len));
-        echo "ffffff".$response->getBody()->getContents();
-                die();
- * */
-        $data = array('name' => 'test', 'age' => 40);
-
-        $newResponse->write(json_encode($data));
+        $newResponse = $response->write(json_encode($args));
 
         return $newResponse;
     }
