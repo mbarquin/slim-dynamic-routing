@@ -18,6 +18,9 @@ namespace mbarquin\SlimDR;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Interop\Container\ContainerInterface;
+use Slim\App;
+use Slim\Http\Request;
+use Slim\Http\Response;
 
 /**
  * Factory class, it configures dynamic router options
@@ -28,14 +31,14 @@ class Factory
     /**
      * Slim application object reference
      *
-     * @var \Slim\App
+     * @var App
      */
     private $slimApp      = null;
 
     /**
      * Grouped routes, first level name
      *
-     * @var strinvg
+     * @var string
      */
     private $group        = null;
 
@@ -64,12 +67,11 @@ class Factory
     /**
      * Main factory constructor, protected to avoid direct instances
      *
-     * @param \Slim\App $app Reference to a previously instanced Slim app
+     * @param App $app Reference to a previously instanced Slim app
      *
-     * @return void
      * @access protected
      */
-    protected function __construct(\Slim\App $app = null)
+    protected function __construct(App $app = null)
     {
         if (is_a($app, '\\Slim\\App') === true) {
             $this->slimApp = $app;
@@ -79,12 +81,12 @@ class Factory
     /**
      * Gets a copy of Factory object to perform parametrizations
      *
-     * @param \Slim\App $app Reference to a previously instanced Slim app
+     * @param App $app Reference to a previously instanced Slim app
      *
-     * @return \MyApp\slimDR\Factory
+     * @return Factory
      * @access public
      */
-    static public function slim(\Slim\App $app = null) {
+    static public function slim(App $app = null) {
         $oFact = new Factory($app);
 
         return $oFact;
@@ -95,7 +97,7 @@ class Factory
      *
      * @param string $group Route group name
      *
-     * @return \MyApp\slimDR\Factory
+     * @return Factory
      * @access public
      */
     public function withGroup($group)
@@ -111,7 +113,7 @@ class Factory
      * Sets a secondary group, intended to group api versions
      *
      * @param string $group Route group name
-     * @return \MyApp\slimDR\Factory
+     * @return Factory
      */
     public function withVersionGroup($group)
     {
@@ -128,9 +130,9 @@ class Factory
      *
      * @param mixed $container
      *
-     * @return \MyApp\slimDR\Factory
+     * @return Factory
      * @access public
-     * @throws InvalidArgumentException
+     * @throws \InvalidArgumentException
      */
     public function withContainer($container = array())
     {
@@ -152,7 +154,7 @@ class Factory
      *
      * @param string $namespace Namespace to autoload controllers
      *
-     * @return \MyApp\slimDR\Factory
+     * @return Factory
      */
     public function withNamespace($namespace)
     {
@@ -167,13 +169,13 @@ class Factory
      * If necessary, performs slim app creation and configures options in order
      * to use dinamic routing
      *
-     * @return \Slim\App
+     * @return App
      * @access public
      */
     public function getApp()
     {
         if($this->slimApp === null) {
-            $this->slimApp = new \Slim\App($this->container);
+            $this->slimApp = new App($this->container);
         }
 
         // Sets main and secondary routing groups.
@@ -185,7 +187,7 @@ class Factory
 
         } else {
             // Sets dynamic routing for bare routes.
-            \mbarquin\SlimDR\Factory::setMap($this->slimApp, $this->namespace);
+            Factory::setMap($this->slimApp, $this->namespace);
         }
 
         return $this->slimApp;
@@ -194,23 +196,23 @@ class Factory
     /**
      * Sets routing groups to be used on dynamic routing
      *
-     * @param \Slim\App $app      Reference to slim app
+     * @param App $app      Reference to slim app
      * @param string    $group    Main group name
      * @param string    $subGroup Secondary group name
      *
      * @return void
      * @access protected
      */
-    private function setGroups(\Slim\App $app, $group, $subGroup = null) {
+    private function setGroups(App $app, $group, $subGroup = null) {
         $ns = $this->namespace;
         $app->group('/'.$group, function () use ($subGroup, $ns) {
             // Version group
             if ($subGroup!== null) {
                 $this->group('/'.$subGroup, function () use ($ns) {
-                    \mbarquin\SlimDR\Factory::setMap($this, $ns);
+                    Factory::setMap($this, $ns);
                 });// End api group.
             } else {
-                \mbarquin\SlimDR\Factory::setMap($this, $ns);
+                Factory::setMap($this, $ns);
             }
         });
     }
@@ -218,17 +220,22 @@ class Factory
     /**
      * Sets main dynamic routing params into Slim app
      *
-     * @param \Slim\App $app
+     * @param App $app
      *
+     * @param $namespace
      * @return void
      */
     static public function setMap($app, $namespace)
     {
         $app->any('/{controller}[/{params:.*}]', function ($request, $response, $args) use($app, $namespace) {
+
             $contDI    = $app->getContainer();
             // Get dependencies.
 
             // Get called method
+            /**
+             * @var $request Request
+             */
             $method = strtolower($request->getMethod());
 
             // Get config namespace if necessary
@@ -239,7 +246,7 @@ class Factory
                 throw new \Exception('Controller must implement \\mbarquin\\SlimDR\\ControllerInterface');
             }
 
-            $funcArgs = \mbarquin\SlimDR\Factory::getArgs(
+            $funcArgs = Factory::getArgs(
                     $request, $response, $args, $contDI, $controller, $method
             );
 
@@ -250,12 +257,13 @@ class Factory
     /**
      * Sets an array to be used to fill parameters in controllers call
      *
-     * @param Psr\Http\Message\ServerRequestInterface $request
-     * @param Psr\Http\Message\ResponseInterface      $response
-     * @param array                                   $args
-     * @param Interop\Container\ContainerInterface    $contDI
-     * @param string                                  $controller
-     * @param string                                  $method
+     * @param \Psr\Http\Message\ServerRequestInterface $request
+     * @param \Psr\Http\Message\ResponseInterface $response
+     * @param array $args
+     * @param \Interop\Container\ContainerInterface $contDI
+     * @param ControllerInterface $controller
+     * @param string $method
+     * @return array
      */
     static function getArgs(ServerRequestInterface $request, ResponseInterface $response, $args, ContainerInterface $contDI, $controller, $method)
     {
