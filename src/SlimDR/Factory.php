@@ -261,6 +261,10 @@ class Factory
     {
         $deps = $controller->getDependencies($method);
 
+        if(!array_key_exists('params', $args)) {
+            $args['params'] = null;
+        }
+
         $aReturn = array (
             'request' => $request,
             'reponse' => $response,
