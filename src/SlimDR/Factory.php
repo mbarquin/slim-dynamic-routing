@@ -243,7 +243,7 @@ class Factory
                     $request, $response, $args, $contDI, $controller, $method
             );
 
-            call_user_func_array(array($controller, $method), $funcArgs);
+            return call_user_func_array(array($controller, $method), $funcArgs);
         });
     }
 
